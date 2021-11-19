@@ -60,7 +60,7 @@ CHIP ALU {
 
         // Selecting to use out or ¬out
         Not16(in=fxy, out=nfxy);
-        Mux16(a=fxy, b=nfxy, sel=no, out[0..7]=ntfxy, out[8..15]=ntfxy2, out=the);
+        Mux16(a=fxy, b=nfxy, sel=no, out[0..7]=ntfxy, out[8..15]=ntfxy2, out=the, out=out);
 
         // Check for 0 as output
         Or8Way(in=ntfxy, out=or1);
@@ -70,7 +70,4 @@ CHIP ALU {
 
         // Check for negative as output
         And16(a[0..15]=true, b=the, out[15]=ng, out[0..14]=aigdhhfaboihf);
-
-        // Output "the"
-        Or16(a=the, b[0..15]=false, out=out); // 
 }

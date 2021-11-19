@@ -45,27 +45,27 @@ CHIP ALU {
         // Get either x or 0
         Mux16(a=x, b[0..15]=false, sel=zx, out=zrx);
         // Get either x or ¬x
-        Not16(in=x, out=notx);
+        Not16(in=zrx, out=notx);
         Mux16(a=zrx, b=notx, sel=nx, out=znx);
 
         // Same business for y :)
         Mux16(a=y, b[0..15]=false, sel=zy, out=zry);
-        Not16(in=y, out=noty);
+        Not16(in=zry, out=noty);
         Mux16(a=zry, b=noty, sel=ny, out=zny);
 
-        And16(a=x, b=y, out=xny);
-        Add16(a=x, b=y, out=xpy);
+        And16(a=znx, b=zny, out=xny);
+        Add16(a=znx, b=zny, out=xpy);
         Mux16(a=xny, b=xpy, sel=f, out=fxy);
 
         Not16(in=fxy, out=nfxy);
-        Mux16(a=fxy, b=nfxy, sel=no, out=ntfxy);
+        Mux16(a=fxy, b=nfxy, sel=no, out[0..7]=ntfxy, out[8..15]=ntfxy2, out=the);
 
-        Or8Way(in=ntfxy[0..7], out=or1);
-        Or8Way(in=ntfxy[8..15], out=or2);
-        Or16(a=or1, b=or2, out=asdfghjkl);
+        Or8Way(in=ntfxy, out=or1);
+        Or8Way(in=ntfxy2, out=or2);
+        Or(a=or1, b=or2, out=asdfghjkl);
         Not(in=asdfghjkl, out=zr);
 
-        And16(a=a[0..15], b=ntfxy, out[15]=ng, out[0..14]=aigdhhfaboihf);
+        And16(a[0..15]=true, b=the, out[15]=ng, out[0..14]=aigdhhfaboihf);
 
-        Or16(a=ntfxy, b[0..15]=false, out=out); // 
+        Or16(a=the, b[0..15]=false, out=out); // 
 }

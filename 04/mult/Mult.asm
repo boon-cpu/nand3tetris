@@ -16,6 +16,16 @@ M=0
 
 @0
 D=M
+@END
+D;JEQ
+
+@1
+D=M
+@END
+D;JEQ
+
+@0
+D=M
 @3
 M=D
 

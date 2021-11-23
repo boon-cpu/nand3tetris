@@ -12,3 +12,56 @@
 // the screen should remain fully clear as long as no key is pressed.
 
 // Put your code here.
+(START)
+@SCREEN
+D=A
+@0
+M=D
+
+// LOOOOOOP
+(KBDLOOP)
+@KBD
+D=M
+@BLACK
+D;JGT
+@WHITE
+D;JEQ
+
+@KBDLOOP
+0;JMP
+// LOOPS through THE loop AND every TIME it CHECKS the KBD address FOR input
+
+(BLACK)
+@1
+M=-1
+@DOTHE
+0;JMP
+
+(WHITE)
+@1
+M=0
+@DOTHE
+0;JMP
+
+(DOTHE)
+@1
+D=M
+
+@0
+A=M
+M=D
+
+@0
+D=M+1
+@KBD
+D=A-D
+
+@0
+M=M+1
+A=M
+
+@DOTHE
+D;JGT
+
+@START
+0;JMP

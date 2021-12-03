@@ -39,4 +39,36 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
+    Mux16(a=instruction, b=BigLoop, sel=instruction[15], out=instruct);
+    Not(in=instruction[15], out=theuhbit);
+
+    Or(a=theuhbit, b=instruction[5], out=thethethe);
+    ARegister(in=instruct, load=thethethe, out=Aregeister, out[0..14]=addressM);
+
+    And(a=instruction[15], b=instruction[12], out=asdfghgfdsa);
+    Mux16(a=Aregeister, b=inM, sel=asdfghgfdsa, out=THEMUX);
+
+    ALU(x=DregisterIGuess, y=THEMUX, zx=instruction[11], nx= instruction[10], zy = instruction[9], ny= instruction[8], f=instruction[7],no=instruction[6], out=BigLoop, out=outM, zr=zr, ng=ng);
+
+    And(a=instruction[15], b=instruction[4], out=DoTheD);
+    DRegister(in=BigLoop, load=DoTheD, out=DregisterIGuess);
+
+    And(a=instruction[15], b=instruction[0], out=JGT);
+    And(a=instruction[15], b=instruction[1], out=JEQ);
+    And(a=instruction[15], b=instruction[2], out=JLT);
+    Not(in=ng, out=positive);
+    Not(in=zr, out=notzero);
+    And(a=positive, b=notzero, out=bignumberyeh);
+    
+    
+    And(a=bignumberyeh, b=JGT, out=jg);
+    And(a=zr, b=JEQ, out=je);
+    And(a=ng, b=JLT, out=jl);
+
+    Or(a=jg, b=je, out=theorgate);
+    Or(a=theorgate, b=jl, out=JUMP);
+
+    PC(in=Aregeister, load=JUMP, inc=true, reset=reset, out[0..14]=pc);
+
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }

@@ -7,62 +7,56 @@ comp={'0':'0101010','1':'0111111','-1':'0111010','D':'0001100','A':'0110000','M'
 // prettier-ignore
 symbols={'SP':0,'LCL':1,'ARG':2,'THIS':3,'THAT':4,'SCREEN':16384,'KBD':24576,'R0':0,'R1':1,'R1':1,'R2':2,'R3':3,'R4':4,'R5':5,'R6':6,'R7':7,'R8':8,'R9':9,'R10':10,'R11':11,'R12':12,'R13':13,'R14':14,'R15':15};
 const fs = require("fs");
-const readline = require("readline");
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-rl.question("Relative file path:", (file) => {
-  fs.writeFile(`${file}.hack`, "", { encoding: "utf-8" }, () => {});
-  fs.readFile(`${file}.asm`, { encoding: "utf-8" }, (_err, data) => {
-    const lines = data.split("\n");
-    const clean = [];
-    const asm = [];
-    lines.forEach((line) => {
-      const cleanLine = line.replace(/\/\/.*/g, "").replace(/\s/g, "");
-      if (cleanLine) clean.push(cleanLine);
-    });
-    let lineNo = 0;
-    clean.forEach(async (line) => {
-      if (line[0] == "(") {
-        const instruction = line.slice(1).substring(0, line.length - 2);
-        symbols[instruction] = lineNo;
-        lineNo--;
-      }
-      lineNo++;
-    });
-    let iterator = 0;
-    clean.forEach(async (line) => {
-      if (line[0] == "@") {
-        const instruction = line.slice(1);
-        if (symbols[instruction] != undefined) {
-          const binary = ((symbols[instruction] + 32768) >>> 0).toString(2);
-          asm.push("0" + binary.slice(1));
-        } else if (!isNaN(instruction)) {
-          const binary = ((parseInt(instruction) + 32768) >>> 0).toString(2);
-          asm.push("0" + binary.slice(1));
-        } else {
-          const binary = ((iterator + 16 + 32768) >>> 0).toString(2);
-          asm.push("0" + binary.slice(1));
-          symbols[instruction] = iterator + 16;
-          iterator++;
-        }
-      } else if (line[0] != "(") {
-        let ops = [];
-        const separated = line.split(/=|;/g);
-        if (line.includes("=") && line.includes(";")) {
-          ops = comp[separated[1]] + dest[separated[0]] + jump[separated[2]];
-        } else if (line.includes("=")) {
-          ops = comp[separated[1]] + dest[separated[0]] + "000";
-        } else if (line.includes(";")) {
-          ops = comp[separated[0]] + "000" + jump[separated[1]];
-        }
-        asm.push("111" + ops);
-      }
-    });
-    fs.writeFileSync(`${file}.hack`, asm.join("\n"), { encoding: "utf-8" });
-    console.log("I compiled your code mate");
-    rl.close();
+const file = process.argv[2];
+fs.writeFile(`${__dirname + file}.hack`, "", { encoding: "utf-8" }, () => {});
+fs.readFile(`${__dirname + file}.asm`, { encoding: "utf-8" }, (_err, data) => {
+  const lines = data.split("\n");
+  const clean = [];
+  const asm = [];
+  lines.forEach((line) => {
+    const cleanLine = line.replace(/\/\/.*/g, "").replace(/\s/g, "");
+    if (cleanLine) clean.push(cleanLine);
   });
+  let lineNo = 0;
+  clean.forEach(async (line) => {
+    if (line[0] == "(") {
+      const instruction = line.slice(1).substring(0, line.length - 2);
+      symbols[instruction] = lineNo;
+      lineNo--;
+    }
+    lineNo++;
+  });
+  let iterator = 0;
+  clean.forEach(async (line) => {
+    if (line[0] == "@") {
+      const instruction = line.slice(1);
+      if (symbols[instruction] != undefined) {
+        const binary = ((symbols[instruction] + 32768) >>> 0).toString(2);
+        asm.push("0" + binary.slice(1));
+      } else if (!isNaN(instruction)) {
+        const binary = ((parseInt(instruction) + 32768) >>> 0).toString(2);
+        asm.push("0" + binary.slice(1));
+      } else {
+        const binary = ((iterator + 16 + 32768) >>> 0).toString(2);
+        asm.push("0" + binary.slice(1));
+        symbols[instruction] = iterator + 16;
+        iterator++;
+      }
+    } else if (line[0] != "(") {
+      let ops = [];
+      const separated = line.split(/=|;/g);
+      if (line.includes("=") && line.includes(";")) {
+        ops = comp[separated[1]] + dest[separated[0]] + jump[separated[2]];
+      } else if (line.includes("=")) {
+        ops = comp[separated[1]] + dest[separated[0]] + "000";
+      } else if (line.includes(";")) {
+        ops = comp[separated[0]] + "000" + jump[separated[1]];
+      }
+      asm.push("111" + ops);
+    }
+  });
+  fs.writeFileSync(`${__dirname + file}.hack`, asm.join("\n"), {
+    encoding: "utf-8",
+  });
+  console.log("I compiled your code mate");
 });

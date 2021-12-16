@@ -1,10 +1,4 @@
 const fs = require("fs");
-const readline = require("readline");
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
 const commands = {
   push: {
     general: `@[THETHETHE]
@@ -154,67 +148,64 @@ const memoryOps = ["push", "pop"];
 let iter = 0;
 
 let translated = [];
-rl.question("Relative file path:", (file) => {
-  const fileName = file.split("/");
-  fs.readFile(
-    `${__dirname + file}.vm`,
-    { encoding: "utf-8" },
-    async (err, data) => {
-      if (err) console.log(err);
-      const lines = data.replace(/\/\/.*/g, "").split("\n");
-      lines.forEach((line, index) => {
-        const clean = line.trim();
-        if (!clean) return;
-        translated.push("// " + clean);
-        const instructs = clean.split(" ");
-        const [operation, segment, addr] = instructs;
-        if (logicOps.includes(operation)) {
-          if (operation == "gt" || operation == "lt" || operation == "eq")
-            iter++;
-          translated.push(logics[operation].replace(/\[iter\]/g, iter));
-        } else if (memoryOps.includes(operation)) {
-          if (segment == "pointer") {
-            translated.push(
-              commands[operation].general.replace(
-                "[THETHETHE]",
-                addr == "1" ? "THAT" : "THIS"
-              )
-            );
-          } else if (segment == "static") {
-            translated.push(
-              commands[operation].general.replace(
-                "[THETHETHE]",
-                fileName[fileName.length - 1] + "." + addr
-              )
-            );
-          } else if (segment == "temp") {
-            translated.push(
-              commands[operation].general.replace("[THETHETHE]", 5 + addr * 1)
-            );
-          } else if (segment == "constant") {
-            translated.push(
-              commands[operation].constant.replace("[THETHETHE]", addr)
-            );
-          } else {
-            translated.push(
-              commands[operation].segmentsa
-                .replace(/\[NAME\]/g, addr)
-                .replace(
-                  /\[SEGMENT\]/g,
-                  segmentCodes[segment] || segment.toUpperCase()
-                )
-            );
-          }
-        } else
-          throw new SyntaxError(
-            `Syntax Error on line ${
-              index + 1
-            }, "${operation}" not a valid operation.`
+const file = process.argv[2];
+const fileName = file.split("/");
+fs.readFile(
+  `${__dirname + file}.vm`,
+  { encoding: "utf-8" },
+  async (err, data) => {
+    if (err) console.log(err);
+    const lines = data.replace(/\/\/.*/g, "").split("\n");
+    lines.forEach((line, index) => {
+      const clean = line.trim();
+      if (!clean) return;
+      translated.push("// " + clean);
+      const instructs = clean.split(" ");
+      const [operation, segment, addr] = instructs;
+      if (logicOps.includes(operation)) {
+        if (operation == "gt" || operation == "lt" || operation == "eq") iter++;
+        translated.push(logics[operation].replace(/\[iter\]/g, iter));
+      } else if (memoryOps.includes(operation)) {
+        if (segment == "pointer") {
+          translated.push(
+            commands[operation].general.replace(
+              "[THETHETHE]",
+              addr == "1" ? "THAT" : "THIS"
+            )
           );
-      });
-      await fs.writeFileSync(__dirname + file + ".asm", translated.join("\n"));
-      console.log("You've absolutely been VMTranslated!");
-      rl.close();
-    }
-  );
-});
+        } else if (segment == "static") {
+          translated.push(
+            commands[operation].general.replace(
+              "[THETHETHE]",
+              fileName[fileName.length - 1] + "." + addr
+            )
+          );
+        } else if (segment == "temp") {
+          translated.push(
+            commands[operation].general.replace("[THETHETHE]", 5 + addr * 1)
+          );
+        } else if (segment == "constant") {
+          translated.push(
+            commands[operation].constant.replace("[THETHETHE]", addr)
+          );
+        } else {
+          translated.push(
+            commands[operation].segmentsa
+              .replace(/\[NAME\]/g, addr)
+              .replace(
+                /\[SEGMENT\]/g,
+                segmentCodes[segment] || segment.toUpperCase()
+              )
+          );
+        }
+      } else
+        throw new SyntaxError(
+          `Syntax Error on line ${
+            index + 1
+          }, "${operation}" not a valid operation.`
+        );
+    });
+    await fs.writeFileSync(__dirname + file + ".asm", translated.join("\n"));
+    console.log("You've absolutely been VMTranslated!");
+  }
+);
